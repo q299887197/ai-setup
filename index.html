@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 工作流配置競賽 — 開發部</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0F172A;
+    --ink: #1E293B;
+    --slate: #334155;
+    --muted: #64748B;
+    --border: #E2E8F0;
+    --surface: #F8FAFC;
+    --white: #FFFFFF;
+    --blue: #3B82F6;
+    --blue-light: #EFF6FF;
+    --blue-mid: #BFDBFE;
+    --teal: #0D9488;
+    --teal-light: #F0FDFA;
+    --teal-mid: #99F6E4;
+    --amber: #D97706;
+    --amber-light: #FFFBEB;
+    --amber-mid: #FDE68A;
+    --purple: #7C3AED;
+    --purple-light: #F5F3FF;
+    --purple-mid: #DDD6FE;
+    --rose: #E11D48;
+    --rose-light: #FFF1F2;
+    --rose-mid: #FECDD3;
+    --green: #059669;
+    --green-light: #ECFDF5;
+    --green-mid: #A7F3D0;
+    --r: 12px;
+    --r-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: #F1F5F9;
+    color: var(--ink);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+
+  /* ── Layout ── */
+  .wrapper { max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  /* ── Hero ── */
+  .hero {
+    background: var(--navy);
+    border-radius: 20px;
+    padding: 52px 48px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(13,148,136,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-tag {
+    display: inline-block;
+    background: rgba(59,130,246,0.2);
+    color: #93C5FD;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+    letter-spacing: 0.04em;
+  }
+  .hero h1 {
+    font-size: 46px;
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .hero h1 span { color: #60A5FA; }
+  .hero-sub {
+    font-size: 18px;
+    color: #94A3B8;
+    max-width: 520px;
+    line-height: 1.6;
+    margin-bottom: 36px;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .meta-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: #CBD5E1;
+    font-size: 13px;
+  }
+  .meta-chip strong { color: #F1F5F9; font-weight: 500; }
+  .dot-icon {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-blue { background: #60A5FA; }
+  .dot-teal { background: #2DD4BF; }
+  .dot-amber { background: #FCD34D; }
+
+  /* ── Part dividers ── */
+  .part-divider {
+    margin: 64px 0 36px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+  }
+  .part-num {
+    font-size: 56px;
+    font-weight: 700;
+    color: #E2E8F0;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .part-info {}
+  .part-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .part-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── Section ── */
+  .section { margin-bottom: 28px; }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+  }
+  .section-title::before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 16px;
+    background: var(--blue);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--white);
+    border-radius: var(--r);
+    border: 1px solid var(--border);
+    padding: 28px 32px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .feature-card {
+    background: var(--white);
+    border-radius: var(--r);
+    border: 1px solid var(--border);
+    padding: 20px 22px;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .feature-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.07); }
+
+  .fc-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .fc-icon {
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .fc-title { font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .fc-sub { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .fc-body { font-size: 14px; color: var(--slate); line-height: 1.6; }
+
+  /* ── Config blocks (cheat sheet) ── */
+  .config-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 680px) { .config-grid { grid-template-columns: 1fr; } }
+
+  .config-card {
+    border-radius: var(--r);
+    padding: 22px 24px;
+    border: 1px solid transparent;
+    display: flex;
+    flex-direction: column;
+  }
+  .config-card.blue { background: var(--blue-light); border-color: var(--blue-mid); }
+  .config-card.teal { background: var(--teal-light); border-color: var(--teal-mid); }
+  .config-card.amber { background: var(--amber-light); border-color: var(--amber-mid); }
+  .config-card.purple { background: var(--purple-light); border-color: var(--purple-mid); }
+  .config-card.rose { background: var(--rose-light); border-color: var(--rose-mid); }
+  .config-card.green { background: var(--green-light); border-color: var(--green-mid); }
+
+  .cfg-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .blue .cfg-name { color: #1D4ED8; }
+  .teal .cfg-name { color: #0F766E; }
+  .amber .cfg-name { color: #92400E; }
+  .purple .cfg-name { color: #5B21B6; }
+  .rose .cfg-name { color: #9F1239; }
+  .green .cfg-name { color: #065F46; }
+
+  .cfg-label {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+  .blue .cfg-label { background: var(--blue-mid); color: #1E40AF; }
+  .teal .cfg-label { background: var(--teal-mid); color: #134E4A; }
+  .amber .cfg-label { background: var(--amber-mid); color: #78350F; }
+  .purple .cfg-label { background: var(--purple-mid); color: #4C1D95; }
+  .rose .cfg-label { background: var(--rose-mid); color: #881337; }
+  .green .cfg-label { background: var(--green-mid); color: #064E3B; }
+
+  .cfg-desc { font-size: 14px; color: var(--slate); line-height: 1.55; margin-bottom: 8px; }
+
+  .cfg-items { list-style: none; }
+  .cfg-items li {
+    font-size: 13px;
+    color: var(--muted);
+    padding: 2px 0;
+    padding-left: 12px;
+    position: relative;
+  }
+  .cfg-items li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    font-size: 10px;
+  }
+
+  .cfg-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 12px;
+    align-self: flex-end;
+    opacity: 0.8;
+  }
+  .cfg-link:hover { opacity: 1; text-decoration: underline; }
+  .blue .cfg-link { color: #2563EB; }
+  .teal .cfg-link { color: #0F766E; }
+  .amber .cfg-link { color: #B45309; }
+  .purple .cfg-link { color: #6D28D9; }
+  .rose .cfg-link { color: #BE123C; }
+  .green .cfg-link { color: #047857; }
+
+  /* ── Code block ── */
+  .code-block {
+    background: var(--navy);
+    border-radius: var(--r);
+    padding: 20px 24px;
+    margin: 14px 0;
+    overflow-x: auto;
+  }
+  .code-block pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #E2E8F0;
+    line-height: 1.7;
+    white-space: pre;
+  }
+  .code-block .c-comment { color: #64748B; }
+  .code-block .c-key { color: #93C5FD; }
+  .code-block .c-val { color: #86EFAC; }
+  .code-block .c-str { color: #FCD34D; }
+  .code-block .c-head { color: #F472B6; font-weight: 600; }
+
+  /* ── Timeline ── */
+  .timeline { display: flex; gap: 0; margin-bottom: 28px; position: relative; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 20px; left: 0; right: 0;
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+  }
+  .tl-item {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    padding: 0 8px;
+  }
+  .tl-dot {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 10px;
+    font-size: 16px;
+    position: relative;
+    z-index: 2;
+  }
+  .tl-dot.active { border-color: var(--blue); background: var(--blue-light); }
+  .tl-date { font-size: 12px; font-weight: 600; color: var(--blue); margin-bottom: 4px; }
+  .tl-label { font-size: 12px; color: var(--slate); line-height: 1.4; }
+
+  /* ── Award cards ── */
+  .award-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 28px; }
+  @media (max-width: 560px) { .award-grid { grid-template-columns: 1fr; } }
+
+  .award-card {
+    background: var(--white);
+    border-radius: var(--r);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .award-emoji { font-size: 28px; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+  .award-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+  .award-desc { font-size: 13px; color: var(--slate); line-height: 1.5; }
+
+  /* ── Submit box ── */
+  .submit-box {
+    background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 100%);
+    border-radius: 16px;
+    padding: 36px 40px;
+    color: white;
+    margin-bottom: 28px;
+  }
+  .submit-box h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #F1F5F9; }
+  .submit-box p { font-size: 14px; color: #94A3B8; margin-bottom: 24px; max-width: 520px; }
+
+  .submit-steps { display: flex; flex-direction: column; gap: 14px; }
+  .step-row { display: flex; gap: 14px; align-items: flex-start; }
+  .step-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(59,130,246,0.25);
+    border: 1px solid rgba(59,130,246,0.4);
+    color: #93C5FD;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .step-content { font-size: 15px; color: #CBD5E1; line-height: 1.6; }
+  .step-content strong { color: #F1F5F9; font-weight: 500; }
+  .step-content code {
+    background: rgba(255,255,255,0.1);
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #86EFAC;
+  }
+
+  /* ── Share section ── */
+  .share-box {
+    background: var(--green-light);
+    border: 1px solid var(--green-mid);
+    border-radius: var(--r);
+    padding: 22px 26px;
+    margin-bottom: 28px;
+  }
+  .share-box h4 { font-size: 16px; font-weight: 600; color: #065F46; margin-bottom: 8px; }
+  .share-box p { font-size: 13px; color: #047857; line-height: 1.6; }
+
+  /* ── Example block ── */
+  .example-tabs {
+    background: var(--white);
+    border-radius: var(--r);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .tab-header {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    gap: 4px;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    user-select: none;
+    transition: color 0.15s;
+  }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+  .tab-panel { display: none; padding: 28px 32px; }
+  .tab-panel.active { display: block; }
+
+  .example-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+    margin-top: 16px;
+  }
+  .example-label:first-child { margin-top: 0; }
+
+  /* ── Comparison table ── */
+  .cmp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cmp-table th {
+    background: var(--surface);
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--slate);
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cmp-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--slate);
+    vertical-align: top;
+  }
+  .cmp-table td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--blue); font-weight: 600; }
+  .cmp-table tr:last-child td { border-bottom: none; }
+  .cmp-table tr:nth-child(even) td { background: #FAFAFA; }
+
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-weight: 500;
+  }
+  .pill-blue { background: var(--blue-light); color: #1D4ED8; }
+  .pill-teal { background: var(--teal-light); color: #0F766E; }
+  .pill-amber { background: var(--amber-light); color: #92400E; }
+
+  /* ── Docs further reading ── */
+  .docs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .doc-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .doc-chip:hover { background: var(--blue-light); border-color: var(--blue-mid); }
+  .doc-chip-icon { font-size: 16px; }
+  .doc-chip-text { font-size: 12px; color: var(--slate); line-height: 1.4; }
+  .doc-chip-text strong { display: block; color: var(--ink); font-size: 13px; font-weight: 500; }
+
+  /* ── Util ── */
+  .mb-8 { margin-bottom: 8px; }
+  .mb-16 { margin-bottom: 16px; }
+  .text-muted { color: var(--muted); font-size: 13px; }
+  .highlight {
+    background: var(--amber-light);
+    border-left: 3px solid var(--amber);
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    font-size: 14px;
+    color: var(--slate);
+    margin: 14px 0;
+  }
+  .highlight strong { color: var(--amber); }
+
+  hr.soft { border: none; border-top: 1px solid var(--border); margin: 8px 0 20px; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- ══ HERO ══ -->
+  <div class="hero">
+    <div class="hero-tag">🚀 開發部內部活動 · 2026 Q2</div>
+    <h1>我的 <span>AI 戰場配置</span><br>工作流競賽</h1>
+    <p class="hero-sub">
+      你怎麼讓 AI 真正幫你工作，而不只是幫你回答問題？<br>
+      把你的 Claude 配置秀出來，一起看看大家都怎麼玩的。
+    </p>
+    <div class="hero-meta">
+      <div class="meta-chip"><span class="dot-icon dot-blue"></span>活動開始 <strong>4/1（三）</strong></div>
+      <div class="meta-chip"><span class="dot-icon dot-teal"></span>成果發表 & 頒獎 <strong>4/30（四）14:00</strong></div>
+      <div class="meta-chip"><span class="dot-icon dot-amber"></span>對象 <strong>開發部全體 RD</strong></div>
+    </div>
+  </div>
+
+  <div class="part-divider">
+    <div class="part-num">01</div>
+    <div class="part-info">
+      <div class="part-title">為什麼要辦這個活動</div>
+      <div class="part-desc">這次競賽的出發點，以及它對你和整個團隊能帶來什麼</div>
+    </div>
+  </div>
+
+  <!-- ══ WHY ══ -->
+  <div class="section">
+    <div class="section-title">為什麼要辦這個</div>
+    <div class="card-grid">
+      <div class="feature-card">
+        <div class="fc-top">
+          <div class="fc-icon" style="background:#EFF6FF">🧠</div>
+          <div>
+            <div class="fc-title">從「會用」到「協作」</div>
+            <div class="fc-sub">leveling up</div>
+          </div>
+        </div>
+        <div class="fc-body">大家都在用 AI，但配置好的和沒配置的，體驗差很多。光是一個好的 CLAUDE.md 就能省掉每次解釋情境的時間。</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-top">
+          <div class="fc-icon" style="background:#F0FDFA">🔁</div>
+          <div>
+            <div class="fc-title">好的配置值得被看見</div>
+            <div class="fc-sub">share & grow</div>
+          </div>
+        </div>
+        <div class="fc-body">每個人都有自己摸索出來的用法，但大多數都悶在自己電腦裡。這個活動就是讓大家互相偷學的機會。</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-top">
+          <div class="fc-icon" style="background:#FFFBEB">⚡</div>
+          <div>
+            <div class="fc-title">Premium 席位，充分發揮</div>
+            <div class="fc-sub">team premium</div>
+          </div>
+        </div>
+        <div class="fc-body">部門已為所有 RD 開通 Claude Team Premium，用量充足。競賽就是最好的理由讓你認真研究一次怎麼用好它。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="part-divider">
+    <div class="part-num">02</div>
+    <div class="part-info">
+      <div class="part-title">Claude Code 配置說明與範例</div>
+      <div class="part-desc">各配置工具的用途、運作方式，以及實際可套用的範例</div>
+    </div>
+  </div>
+
+  <!-- ══ WHAT IS CLAUDE CODE CONFIG ══ -->
+  <div class="section">
+    <div class="section-title">Claude Code 配置有哪些？（快速說明）</div>
+    <div class="config-grid">
+
+      <div class="config-card blue">
+        <div class="cfg-name">CLAUDE.md</div>
+        <div class="cfg-label">自動載入</div>
+        <div class="cfg-desc">放在專案根目錄或 <code style="font-family:monospace;font-size:12px;background:rgba(0,0,0,0.06);padding:1px 4px;border-radius:3px">~/.claude/</code>，每次 session 開始時自動讀入。就像給 AI 看的「你好這是我們專案」說明書。</div>
+        <ul class="cfg-items">
+          <li>Tech Stack、框架、版本</li>
+          <li>命名規則、禁止行為</li>
+          <li>常用指令、架構慣例</li>
+          <li>全域設定或專案層都可以放</li>
+        </ul>
+        <a class="cfg-link" href="https://code.claude.com/docs/en/memory" target="_blank">官方文件 ↗</a>
+      </div>
+
+      <div class="config-card teal">
+        <div class="cfg-name">Skills 技能檔</div>
+        <div class="cfg-label">手動 or 自動觸發</div>
+        <div class="cfg-desc">放在 <code style="font-family:monospace;font-size:12px;background:rgba(0,0,0,0.06);padding:1px 4px;border-radius:3px">.claude/skills/</code>，可以用 <code style="font-family:monospace;font-size:12px;background:rgba(0,0,0,0.06);padding:1px 4px;border-radius:3px">/skill-name</code> 手動觸發，或讓 Claude 根據語境自動載入。</div>
+        <ul class="cfg-items">
+          <li>/pr-review — 自動 code review</li>
+          <li>/deploy-check — 上線前檢查清單</li>
+          <li>/api-doc — 生成 API 文件範本</li>
+          <li>也可以做知識庫，讓 Claude 隨時參考</li>
+        </ul>
+        <a class="cfg-link" href="https://code.claude.com/docs/en/skills" target="_blank">官方文件 ↗</a>
+      </div>
+
+      <div class="config-card purple">
+        <div class="cfg-name">Subagents</div>
+        <div class="cfg-label">隔離執行</div>
+        <div class="cfg-desc">在獨立的 context 裡跑，避免探索任務把你的主對話 context 塞爆。Claude 會自動判斷什麼時候委派給它。</div>
+        <ul class="cfg-items">
+          <li>Explore — 唯讀掃描程式庫</li>
+          <li>Plan — 規劃模式的研究用</li>
+          <li>General-purpose — 複雜多步驟任務</li>
+          <li>自訂：程式碼審查、安全掃描</li>
+          <li>路徑：.claude/agents/</li>
+        </ul>
+        <a class="cfg-link" href="https://code.claude.com/docs/en/sub-agents" target="_blank">官方文件 ↗</a>
+      </div>
+
+      <div class="config-card amber">
+        <div class="cfg-name">Hooks</div>
+        <div class="cfg-label">事件自動觸發</div>
+        <div class="cfg-desc">在 Claude Code 生命週期的特定事件執行腳本。不依賴 AI 判斷，<strong>一定會跑</strong>。</div>
+        <ul class="cfg-items">
+          <li>PostToolUse → 存檔後自動 ESLint</li>
+          <li>Notification → Claude 等待輸入時推播通知</li>
+          <li>PreToolUse → 阻止危險指令執行</li>
+          <li>設定在 settings.json 的 hooks 欄位</li>
+        </ul>
+        <a class="cfg-link" href="https://code.claude.com/docs/en/hooks-guide" target="_blank">官方文件 ↗</a>
+      </div>
+
+      <div class="config-card rose">
+        <div class="cfg-name">MCP 整合</div>
+        <div class="cfg-label">連外部服務</div>
+        <div class="cfg-desc">Model Context Protocol，讓 Claude 能直接操作外部工具，不用你手動複製貼上。</div>
+        <ul class="cfg-items">
+          <li>Notion、GitHub、Jira、Figma</li>
+          <li>新增：claude mcp add</li>
+          <li>讓 AI 直接查票、建文件、查 PR</li>
+        </ul>
+        <a class="cfg-link" href="https://code.claude.com/docs/en/features-overview" target="_blank">官方文件 ↗</a>
+      </div>
+
+      <div class="config-card green">
+        <div class="cfg-name">Auto Memory</div>
+        <div class="cfg-label">自動學習</div>
+        <div class="cfg-desc">Claude 在工作中自動記下有用的事，例如你的建置指令、常見 bug 解法、架構備註，下次不用再說一遍。</div>
+        <ul class="cfg-items">
+          <li>v2.1.59+ 才有，預設開啟</li>
+          <li>/memory 指令查看 & 編輯</li>
+          <li>儲存在 ~/.claude/projects/</li>
+        </ul>
+        <a class="cfg-link" href="https://code.claude.com/docs/en/memory" target="_blank">官方文件 ↗</a>
+      </div>
+
+      <div class="config-card amber">
+        <div class="cfg-name">Rules 條件式規則</div>
+        <div class="cfg-label">路徑匹配觸發</div>
+        <div class="cfg-desc">放在 <code style="font-family:monospace;font-size:12px;background:rgba(0,0,0,0.06);padding:1px 4px;border-radius:3px">.claude/rules/</code>，透過 YAML frontmatter 指定路徑條件，只有在處理符合路徑的檔案時才載入，不影響其他檔案。</div>
+        <ul class="cfg-items">
+          <li>paths: ["src/api/**/*.ts"] — 只在 API 檔案生效</li>
+          <li>無 paths 設定 = 等同 CLAUDE.md 全域載入</li>
+          <li>支援 symlink，可跨專案共用同一份規則</li>
+          <li>路徑：.claude/rules/</li>
+        </ul>
+        <a class="cfg-link" href="https://code.claude.com/docs/en/memory" target="_blank">官方文件 ↗</a>
+      </div>
+
+    </div>
+
+    <!-- Comparison table -->
+    <div class="card">
+      <div class="example-label">各配置的觸發方式 & 適用場景對照</div>
+      <table class="cmp-table">
+        <thead>
+          <tr><th>配置</th><th>觸發方式</th><th>context 消耗</th><th>最適合</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>CLAUDE.md</td><td>每次 session 自動</td><td><span class="pill pill-amber">固定佔用</span></td><td>長期有效的規範、架構說明</td></tr>
+          <tr><td>Skills</td><td>/name 或自然語言</td><td><span class="pill pill-teal">需要才載入</span></td><td>可重用工作流、知識庫</td></tr>
+          <tr><td>Subagents</td><td>自動委派 / @name</td><td><span class="pill pill-blue">完全隔離</span></td><td>大量探索、讀程式碼不想污染主 ctx</td></tr>
+          <tr><td>Hooks</td><td>事件觸發（確定性）</td><td><span class="pill pill-teal">幾乎零</span></td><td>一定要跑的副作用（格式化、通知）</td></tr>
+          <tr><td>MCP</td><td>工具呼叫</td><td><span class="pill pill-teal">按需</span></td><td>連接外部服務</td></tr>
+          <tr><td>Auto Memory</td><td>AI 自動寫入</td><td><span class="pill pill-amber">固定小量</span></td><td>跨 session 記憶累積，無需手動維護</td></tr>
+          <tr><td>Rules</td><td>路徑匹配時自動</td><td><span class="pill pill-teal">需要才載入</span></td><td>針對特定模組或目錄套用細部規範</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ FLOW DIAGRAM ══ -->
+  <div class="section">
+    <div class="section-title">Claude Code 如何運作？</div>
+    <div class="card" style="padding: 28px 28px 20px;">
+      <p style="font-size:13px;color:var(--slate);margin-bottom:20px;line-height:1.7">
+        每次啟動 session，Claude Code 會依固定順序讀入設定檔，把所有內容合併進 Context Window 後才開始等你說話。<br>
+        Prompt 送出後，再根據需求決定走哪條執行路徑。
+      </p>
+      <svg viewBox="0 0 1000 1260" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+        <defs>
+          <marker id="arr" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto">
+            <path d="M0,0.5 L0,7.5 L8,4 z" fill="#94A3B8"/>
+          </marker>
+        </defs>
+
+        <!-- ═══ PHASE 1 HEADER ═══ -->
+        <rect x="0" y="0" width="1000" height="42" rx="8" fill="#0F172A"/>
+        <text x="18" y="21" fill="#60A5FA" font-size="14" font-weight="bold" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">PHASE 1</text>
+        <text x="100" y="21" fill="#F1F5F9" font-size="13.5" font-weight="bold" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">Session 啟動 — 載入順序（CLAUDE.md：下方覆蓋上方；settings.json：全域優先於專案）</text>
+
+        <!-- PHASE 1 ROWS — each row h=52, gap divider -->
+
+        <!-- ① Managed Policy y=44 -->
+        <rect x="0" y="44" width="1000" height="52" fill="#FFF1F2"/>
+        <rect x="0" y="44" width="6" height="52" fill="#E11D48"/>
+        <circle cx="30" cy="70" r="14" fill="#FECDD3"/>
+        <text x="30" y="70" fill="#9F1239" font-size="13" font-weight="bold" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif">①</text>
+        <text x="58" y="62" fill="#9F1239" font-size="13.5" font-weight="600" dominant-baseline="middle" font-family="'Noto Sans TC',monospace">Managed Policy CLAUDE.md</text>
+        <text x="58" y="82" fill="#BE123C" font-size="12" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">企業統一下發的強制規範，無法被任何層級覆蓋；若無企業帳號此層不存在</text>
+        <rect x="742" y="54" width="248" height="32" rx="16" fill="#FECDD3"/>
+        <text x="866" y="70" fill="#9F1239" font-size="12" font-weight="600" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">最高優先 · 強制</text>
+        <line x1="6" y1="96" x2="1000" y2="96" stroke="#FEE2E2" stroke-width="1"/>
+
+        <!-- ② Global CLAUDE.md y=96 -->
+        <rect x="0" y="96" width="1000" height="52" fill="#EFF6FF"/>
+        <rect x="0" y="96" width="6" height="52" fill="#3B82F6"/>
+        <circle cx="30" cy="122" r="14" fill="#BFDBFE"/>
+        <text x="30" y="122" fill="#1D4ED8" font-size="13" font-weight="bold" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif">②</text>
+        <text x="58" y="114" fill="#1D4ED8" font-size="13.5" font-weight="600" dominant-baseline="middle" font-family="'Noto Sans TC',monospace">~/.claude/CLAUDE.md</text>
+        <text x="58" y="134" fill="#2563EB" font-size="12" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">個人全域偏好：慣用語言、輸出格式、通用規範，對所有專案生效</text>
+        <rect x="742" y="106" width="248" height="32" rx="16" fill="#BFDBFE"/>
+        <text x="866" y="122" fill="#1D4ED8" font-size="12" font-weight="600" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">全域 · 所有專案</text>
+        <line x1="6" y1="148" x2="1000" y2="148" stroke="#DBEAFE" stroke-width="1"/>
+
+        <!-- ③ Auto Memory y=148 -->
+        <rect x="0" y="148" width="1000" height="52" fill="#ECFDF5"/>
+        <rect x="0" y="148" width="6" height="52" fill="#059669"/>
+        <circle cx="30" cy="174" r="14" fill="#A7F3D0"/>
+        <text x="30" y="174" fill="#065F46" font-size="13" font-weight="bold" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif">③</text>
+        <text x="58" y="166" fill="#065F46" font-size="13.5" font-weight="600" dominant-baseline="middle" font-family="'Noto Sans TC',monospace">~/.claude/projects/&lt;project-hash&gt;/memory/MEMORY.md</text>
+        <text x="58" y="186" fill="#047857" font-size="12" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">AI 自動累積的跨 session 記憶：建置指令、常見 bug 解法、架構備註</text>
+        <rect x="742" y="158" width="248" height="32" rx="16" fill="#A7F3D0"/>
+        <text x="866" y="174" fill="#065F46" font-size="12" font-weight="600" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">Auto Memory · 自動學習</text>
+        <line x1="6" y1="200" x2="1000" y2="200" stroke="#D1FAE5" stroke-width="1"/>
+
+        <!-- ④ settings.json y=200 h=78 (two sub-rows) -->
+        <rect x="0" y="200" width="1000" height="78" fill="#FFFBEB"/>
+        <rect x="0" y="200" width="6" height="78" fill="#D97706"/>
+        <circle cx="30" cy="239" r="14" fill="#FDE68A"/>
+        <text x="30" y="239" fill="#92400E" font-size="13" font-weight="bold" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif">④</text>
+        <text x="58" y="214" fill="#92400E" font-size="13.5" font-weight="600" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">settings.json — 工具權限、Hooks 事件設定、MCP Server 配置</text>
+        <!-- sub-row 1: global -->
+        <rect x="58" y="228" width="36" height="16" rx="5" fill="#FCD34D"/>
+        <text x="76" y="236" fill="#78350F" font-size="10" font-weight="700" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">全域</text>
+        <text x="100" y="236" fill="#B45309" font-size="12" dominant-baseline="middle" font-family="'Noto Sans TC',monospace">~/.claude/settings.json</text>
+        <!-- sub-row 2: project -->
+        <rect x="58" y="250" width="36" height="16" rx="5" fill="#FDE68A"/>
+        <text x="76" y="258" fill="#78350F" font-size="10" font-weight="700" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">專案</text>
+        <text x="100" y="258" fill="#B45309" font-size="12" dominant-baseline="middle" font-family="'Noto Sans TC',monospace">&lt;project&gt;/.claude/settings.json</text>
+        <!-- note -->
+        <rect x="58" y="272" width="600" height="0"/>
+        <!-- priority note pill -->
+        <rect x="740" y="218" width="250" height="44" rx="10" fill="#FEF3C7" stroke="#FDE68A" stroke-width="1.5"/>
+        <text x="865" y="234" fill="#92400E" font-size="11.5" font-weight="600" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">優先序：全域 &gt; 專案</text>
+        <text x="865" y="252" fill="#B45309" font-size="10.5" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">（與 CLAUDE.md 方向相反）</text>
+        <line x1="6" y1="278" x2="1000" y2="278" stroke="#FEF3C7" stroke-width="1"/>
+
+        <!-- ⑤ Project CLAUDE.md y=278 -->
+        <rect x="0" y="278" width="1000" height="52" fill="#EFF6FF"/>
+        <rect x="0" y="278" width="6" height="52" fill="#2563EB"/>
+        <circle cx="30" cy="304" r="14" fill="#DBEAFE"/>
+        <text x="30" y="304" fill="#1D4ED8" font-size="13" font-weight="bold" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif">⑤</text>
+        <text x="58" y="296" fill="#1D4ED8" font-size="13.5" font-weight="600" dominant-baseline="middle" font-family="'Noto Sans TC',monospace">&lt;project-root&gt;/CLAUDE.md</text>
+        <text x="58" y="316" fill="#2563EB" font-size="12" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">這個專案的架構說明、命名規則、Tech Stack、禁止行為；通常 commit 進 Git</text>
+        <rect x="742" y="288" width="248" height="32" rx="16" fill="#DBEAFE"/>
+        <text x="866" y="304" fill="#1D4ED8" font-size="12" font-weight="600" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">專案層 · 覆蓋全域 CLAUDE.md</text>
+        <line x1="6" y1="330" x2="1000" y2="330" stroke="#DBEAFE" stroke-width="1"/>
+
+        <!-- ⑥ Subdir CLAUDE.md y=330 -->
+        <rect x="0" y="330" width="1000" height="52" fill="#F0F9FF"/>
+        <rect x="0" y="330" width="6" height="52" fill="#0EA5E9"/>
+        <circle cx="30" cy="356" r="14" fill="#BAE6FD"/>
+        <text x="30" y="356" fill="#0369A1" font-size="13" font-weight="bold" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif">⑥</text>
+        <text x="58" y="348" fill="#0369A1" font-size="13.5" font-weight="600" dominant-baseline="middle" font-family="'Noto Sans TC',monospace">&lt;project&gt;/src/api/CLAUDE.md  （或任意子目錄）</text>
+        <text x="58" y="368" fill="#0EA5E9" font-size="12" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">只有在該子目錄下工作時才載入；可為特定模組設置更細緻的規範</text>
+        <rect x="742" y="340" width="248" height="32" rx="16" fill="#BAE6FD"/>
+        <text x="866" y="356" fill="#0369A1" font-size="12" font-weight="600" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">子目錄層 · 最高優先</text>
+        <line x1="6" y1="382" x2="1000" y2="382" stroke="#E0F2FE" stroke-width="1"/>
+
+        <!-- ⑦ Skills y=382 h=78 -->
+        <rect x="0" y="382" width="1000" height="78" fill="#F0FDFA"/>
+        <rect x="0" y="382" width="6" height="78" fill="#0D9488"/>
+        <circle cx="30" cy="421" r="14" fill="#99F6E4"/>
+        <text x="30" y="421" fill="#0F766E" font-size="13" font-weight="bold" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif">⑦</text>
+        <text x="58" y="396" fill="#0F766E" font-size="13.5" font-weight="600" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">Skills — 描述清單供觸發匹配，SKILL.md 本體按需動態載入</text>
+        <rect x="58" y="410" width="36" height="16" rx="5" fill="#5EEAD4"/>
+        <text x="76" y="418" fill="#134E4A" font-size="10" font-weight="700" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">全域</text>
+        <text x="100" y="418" fill="#0D9488" font-size="12" dominant-baseline="middle" font-family="'Noto Sans TC',monospace">~/.claude/skills/*/SKILL.md</text>
+        <rect x="58" y="432" width="36" height="16" rx="5" fill="#99F6E4"/>
+        <text x="76" y="440" fill="#134E4A" font-size="10" font-weight="700" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">專案</text>
+        <text x="100" y="440" fill="#0D9488" font-size="12" dominant-baseline="middle" font-family="'Noto Sans TC',monospace">&lt;project&gt;/.claude/skills/*/SKILL.md</text>
+        <rect x="742" y="401" width="248" height="32" rx="16" fill="#99F6E4"/>
+        <text x="866" y="417" fill="#0F766E" font-size="12" font-weight="600" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">技能索引 · 按需載入</text>
+
+        <!-- Arrow to context ready -->
+        <line x1="500" y1="462" x2="500" y2="488" stroke="#94A3B8" stroke-width="2.5" marker-end="url(#arr)"/>
+
+        <!-- Context window ready -->
+        <rect x="170" y="490" width="660" height="54" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+        <text x="500" y="512" fill="#065F46" font-size="14" font-weight="bold" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">✓  Context Window 完成組裝</text>
+        <text x="500" y="532" fill="#047857" font-size="12" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">等待使用者送出 Prompt</text>
+
+        <!-- Phase 2 arrow -->
+        <line x1="500" y1="544" x2="500" y2="568" stroke="#94A3B8" stroke-width="2.5" marker-end="url(#arr)"/>
+
+        <!-- ═══ PHASE 2 HEADER ═══ -->
+        <rect x="0" y="570" width="1000" height="42" rx="8" fill="#1E293B"/>
+        <text x="18" y="591" fill="#F472B6" font-size="14" font-weight="bold" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">PHASE 2</text>
+        <text x="100" y="591" fill="#F1F5F9" font-size="13.5" font-weight="bold" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">Prompt 送出後 — 執行路徑判斷</text>
+
+        <!-- Arrow -->
+        <line x1="500" y1="612" x2="500" y2="638" stroke="#94A3B8" stroke-width="2.5" marker-end="url(#arr)"/>
+
+        <!-- Prompt box -->
+        <rect x="310" y="640" width="380" height="50" rx="10" fill="#0F172A"/>
+        <text x="500" y="665" fill="#F1F5F9" font-size="14" font-weight="bold" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">使用者送出 Prompt</text>
+
+        <!-- Hook tag -->
+        <rect x="210" y="704" width="580" height="32" rx="16" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1.5"/>
+        <text x="500" y="720" fill="#92400E" font-size="12" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">UserPromptSubmit Hook 觸發（可注入額外 context 或攔截 prompt）</text>
+
+        <!-- Arrow -->
+        <line x1="500" y1="736" x2="500" y2="762" stroke="#94A3B8" stroke-width="2.5" marker-end="url(#arr)"/>
+
+        <!-- Analysis box -->
+        <rect x="290" y="764" width="420" height="50" rx="10" fill="#334155"/>
+        <text x="500" y="789" fill="#E2E8F0" font-size="13" font-weight="600" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">Claude 判斷任務類型 → 選擇執行路徑</text>
+
+        <!-- Fork vertical then horizontal -->
+        <line x1="500" y1="814" x2="500" y2="844" stroke="#94A3B8" stroke-width="1.5"/>
+        <line x1="167" y1="844" x2="833" y2="844" stroke="#94A3B8" stroke-width="1.5"/>
+        <line x1="167" y1="844" x2="167" y2="862" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="500" y1="844" x2="500" y2="862" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="833" y1="844" x2="833" y2="862" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Path labels -->
+        <rect x="88" y="832" width="158" height="22" rx="11" fill="#F0FDFA" stroke="#99F6E4" stroke-width="1.5"/>
+        <text x="167" y="845" fill="#0F766E" font-size="11.5" font-weight="600" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">路徑 A · Skill 觸發</text>
+        <rect x="404" y="832" width="192" height="22" rx="11" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1.5"/>
+        <text x="500" y="845" fill="#5B21B6" font-size="11.5" font-weight="600" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">路徑 B · Subagent 委派</text>
+        <rect x="746" y="832" width="174" height="22" rx="11" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1.5"/>
+        <text x="833" y="845" fill="#92400E" font-size="11.5" font-weight="600" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">路徑 C · 工具操作</text>
+
+        <!-- Branch A: Skill (cx=167, w=290) -->
+        <rect x="22" y="864" width="290" height="166" rx="10" fill="#F0FDFA" stroke="#0D9488" stroke-width="2"/>
+        <text x="167" y="888" fill="#0F766E" font-size="13.5" font-weight="bold" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">Skill 觸發</text>
+        <line x1="40" y1="900" x2="296" y2="900" stroke="#99F6E4" stroke-width="1.5"/>
+        <text x="167" y="922" fill="#0D9488" font-size="12" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">描述匹配 → 載入 SKILL.md</text>
+        <text x="167" y="946" fill="#0D9488" font-size="12" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">在主 context 直接執行</text>
+        <text x="167" y="970" fill="#94A3B8" font-size="11" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">（共用主對話 context）</text>
+        <rect x="44" y="988" width="246" height="32" rx="8" fill="#ECFDF5"/>
+        <text x="167" y="1004" fill="#065F46" font-size="11.5" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">可重用工作流 · 知識庫參考</text>
+
+        <!-- Branch B: Subagent (cx=500, w=290) -->
+        <rect x="355" y="864" width="290" height="166" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+        <text x="500" y="888" fill="#5B21B6" font-size="13.5" font-weight="bold" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">Subagent 委派</text>
+        <line x1="373" y1="900" x2="629" y2="900" stroke="#DDD6FE" stroke-width="1.5"/>
+        <text x="500" y="922" fill="#7C3AED" font-size="12" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">獨立 context 隔離執行</text>
+        <text x="500" y="946" fill="#7C3AED" font-size="12" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">完成後僅回傳摘要</text>
+        <text x="500" y="970" fill="#94A3B8" font-size="11" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">（不污染主對話 context）</text>
+        <rect x="377" y="988" width="246" height="32" rx="8" fill="#EDE9FE"/>
+        <text x="500" y="1004" fill="#4C1D95" font-size="11.5" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">大量探索 · 程式庫掃描</text>
+
+        <!-- Branch C: Tool (cx=833, w=290) -->
+        <rect x="688" y="864" width="290" height="166" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+        <text x="833" y="888" fill="#92400E" font-size="13.5" font-weight="bold" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">工具操作</text>
+        <line x1="706" y1="900" x2="962" y2="900" stroke="#FDE68A" stroke-width="1.5"/>
+        <text x="833" y="922" fill="#D97706" font-size="12" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">PreToolUse Hook 確認許可</text>
+        <text x="833" y="946" fill="#D97706" font-size="12" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">工具執行（Read / Write / Bash）</text>
+        <text x="833" y="970" fill="#D97706" font-size="12" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">PostToolUse Hook 收尾</text>
+        <rect x="706" y="988" width="246" height="32" rx="8" fill="#FEF3C7"/>
+        <text x="833" y="1004" fill="#78350F" font-size="11.5" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">Read / Write / Bash / MCP</text>
+
+        <!-- Merge -->
+        <line x1="167" y1="1030" x2="167" y2="1058" stroke="#94A3B8" stroke-width="1.5"/>
+        <line x1="500" y1="1030" x2="500" y2="1058" stroke="#94A3B8" stroke-width="1.5"/>
+        <line x1="833" y1="1030" x2="833" y2="1058" stroke="#94A3B8" stroke-width="1.5"/>
+        <line x1="167" y1="1058" x2="833" y2="1058" stroke="#94A3B8" stroke-width="1.5"/>
+        <line x1="500" y1="1058" x2="500" y2="1082" stroke="#94A3B8" stroke-width="2.5" marker-end="url(#arr)"/>
+
+        <!-- Notification hook -->
+        <rect x="210" y="1084" width="580" height="32" rx="16" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1.5"/>
+        <text x="500" y="1100" fill="#92400E" font-size="12" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">Notification Hook 觸發（任務完成或需要使用者確認時推播通知）</text>
+
+        <!-- Arrow -->
+        <line x1="500" y1="1116" x2="500" y2="1142" stroke="#94A3B8" stroke-width="2.5" marker-end="url(#arr)"/>
+
+        <!-- Response -->
+        <rect x="310" y="1144" width="380" height="50" rx="10" fill="#0F172A"/>
+        <text x="500" y="1169" fill="#F1F5F9" font-size="14" font-weight="bold" text-anchor="middle" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">回應使用者</text>
+
+        <!-- Legend -->
+        <rect x="0" y="1214" width="1000" height="46" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+        <rect x="14" y="1228" width="10" height="10" rx="2" fill="#E11D48"/>
+        <text x="30" y="1235" fill="#64748B" font-size="12" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">強制規範</text>
+        <rect x="110" y="1228" width="10" height="10" rx="2" fill="#3B82F6"/>
+        <text x="126" y="1235" fill="#64748B" font-size="12" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">CLAUDE.md（全域 &lt; 專案 &lt; 子目錄）</text>
+        <rect x="360" y="1228" width="10" height="10" rx="2" fill="#059669"/>
+        <text x="376" y="1235" fill="#64748B" font-size="12" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">Auto Memory</text>
+        <rect x="480" y="1228" width="10" height="10" rx="2" fill="#D97706"/>
+        <text x="496" y="1235" fill="#64748B" font-size="12" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">settings.json（全域 &gt; 專案，與 CLAUDE.md 相反）</text>
+        <rect x="764" y="1228" width="10" height="10" rx="2" fill="#0D9488"/>
+        <text x="780" y="1235" fill="#64748B" font-size="12" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">Skills</text>
+        <rect x="828" y="1228" width="10" height="10" rx="2" fill="#7C3AED"/>
+        <text x="844" y="1235" fill="#64748B" font-size="12" dominant-baseline="middle" font-family="'Noto Sans TC',sans-serif">Subagents</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ══ REAL EXAMPLE ══ -->
+  <div class="section">
+    <div class="section-title">實際案例長這樣</div>
+    <div class="example-tabs">
+      <div class="tab-header">
+        <div class="tab active" onclick="switchTab(0)">CLAUDE.md（前端後台）</div>
+        <div class="tab" onclick="switchTab(1)">Skill 技能檔</div>
+        <div class="tab" onclick="switchTab(2)">Hooks 設定</div>
+        <div class="tab" onclick="switchTab(3)">Subagents</div>
+        <div class="tab" onclick="switchTab(4)">Rules 條件式規則</div>
+      </div>
+
+      <div class="tab-panel active">
+        <div class="example-label">專案根目錄 → CLAUDE.md</div>
+        <div class="code-block">
+          <pre><span class="c-head"># Sentinel 後台專案</span>
+
+<span class="c-key">## Tech Stack</span>
+<span class="c-val">- Framework: Nuxt 3 + Monorepo (pnpm workspace)
+- UI: Vuetify 3 / TypeScript
+- 狀態管理: Pinia
+- API: Laravel 12，RESTful</span>
+
+<span class="c-key">## 命名慣例</span>
+<span class="c-val">- 元件用 PascalCase（UserTable.vue）
+- Composable 用 use 前綴（useUserList.ts）
+- Store 用 camelCase + Store 後綴（userStore）</span>
+
+<span class="c-key">## 注意事項</span>
+<span class="c-val">- 不直接在元件裡呼叫 API，一律透過 composable
+- 不使用 any 型別，必須明確定義
+- 修改 packages/shared 前先確認組長</span>
+
+<span class="c-key">## 時間處理</span>
+<span class="c-val">- 統一使用 useDateTime composable
+- 送後端參數格式：ISO 8601</span></pre>
+        </div>
+        <div class="highlight">
+          <strong>效果：</strong>不用每次開 session 都解釋「我們用 Nuxt 3 + Pinia，命名要這樣...」，AI 一開始就知道了。
+        </div>
+      </div>
+
+      <div class="tab-panel">
+        <div class="example-label">路徑：.claude/skills/pr-review/SKILL.md</div>
+        <div class="code-block">
+          <pre><span class="c-comment">---
+name: pr-review
+description: 進行 Vue 元件 Code Review，確認型別、架構、命名
+---</span>
+
+<span class="c-head">進行元件審查時，請依序確認：</span>
+
+<span class="c-val">1. Props 是否有明確的 TypeScript 型別定義
+2. Emit 事件命名是否 kebab-case
+3. API 呼叫是否透過 composable
+4. 是否有不必要的 any 型別
+5. JSDoc 說明是否完整</span>
+
+<span class="c-key">回傳格式：</span>
+<span class="c-val">問題清單（嚴重程度排序）+ 建議改法</span></pre>
+        </div>
+        <p class="text-muted">輸入 <code style="font-family:monospace;background:#F1F5F9;padding:2px 6px;border-radius:4px">/pr-review</code> 就觸發，不用每次重新說明要查什麼。</p>
+      </div>
+
+      <div class="tab-panel">
+        <div class="example-label">settings.json → 存 .vue 自動執行 ESLint</div>
+        <div class="code-block">
+          <pre><span class="c-val">{
+  </span><span class="c-key">"hooks"</span><span class="c-val">: {
+    </span><span class="c-key">"PostToolUse"</span><span class="c-val">: [{
+      </span><span class="c-key">"matcher"</span><span class="c-val">: </span><span class="c-str">"Write(*.vue)"</span><span class="c-val">,
+      </span><span class="c-key">"hooks"</span><span class="c-val">: [{
+        </span><span class="c-key">"type"</span><span class="c-val">: </span><span class="c-str">"command"</span><span class="c-val">,
+        </span><span class="c-key">"command"</span><span class="c-val">: </span><span class="c-str">"npx eslint --fix $file"</span><span class="c-val">
+      }]
+    }],
+    </span><span class="c-key">"Notification"</span><span class="c-val">: [{
+      </span><span class="c-key">"matcher"</span><span class="c-val">: </span><span class="c-str">""</span><span class="c-val">,
+      </span><span class="c-key">"hooks"</span><span class="c-val">: [{
+        </span><span class="c-key">"type"</span><span class="c-val">: </span><span class="c-str">"command"</span><span class="c-val">,
+        </span><span class="c-key">"command"</span><span class="c-val">: </span><span class="c-str">"osascript -e 'display notification \"Claude 完成了\" with title \"Claude Code\"'"</span><span class="c-val">
+      }]
+    }]
+  }
+}</span></pre>
+        </div>
+        <p class="text-muted">存完 .vue 自動跑 ESLint 修正，任務跑完自動桌面通知，不用一直盯著 terminal。</p>
+      </div>
+
+      <div class="tab-panel">
+        <div class="example-label">路徑：.claude/agents/codebase-explorer.md</div>
+        <p style="font-size:14px;color:var(--slate);line-height:1.7;margin-bottom:16px">
+          Subagent 是一個在<strong>獨立 context window</strong> 裡執行的 AI 分身，完成任務後只把摘要回傳給你的主對話。它最大的用途是處理「需要大量讀取程式庫、查找檔案、探索架構」這類工作——這些動作如果放在主對話裡跑，會把 context 塞爆，影響後續開發的精準度。
+        </p>
+        <div class="code-block">
+          <pre><span class="c-comment">---
+name: codebase-explorer
+description: 掃描並分析專案程式庫結構，適合在需要理解新功能影響範圍、
+             或接手陌生模組時使用。不會修改任何檔案。
+tools: Read, Glob, Grep
+---</span>
+
+<span class="c-head">你是一個唯讀的程式庫分析助理。</span>
+
+<span class="c-val">任務收到後，依序執行：
+1. 掃描相關目錄，找出與任務相關的檔案
+2. 理解各模組的職責與相互依賴關係
+3. 找出潛在的影響範圍（哪些地方引用了目標模組）
+4. 整理成簡潔的摘要回傳給主對話</span>
+
+<span class="c-key">輸出格式：</span>
+<span class="c-val">- 相關檔案清單（含路徑）
+- 模組依賴關係說明
+- 潛在影響範圍
+- 建議的修改切入點</span>
+
+<span class="c-comment"># 此 agent 只使用 Read / Glob / Grep，不會執行任何寫入操作</span></pre>
+        </div>
+        <div class="highlight" style="margin-top:16px">
+          <strong>使用時機：</strong>當你要修改一個陌生的模組、或評估一個新功能的影響範圍時，直接對主對話說「用 codebase-explorer 幫我分析 UserStore 的依賴」，Subagent 在背景跑完後只回傳一份摘要，主對話的 context 完全不受影響，後續開發仍然乾淨。
+        </div>
+        <div style="margin-top:16px;padding:14px 18px;background:var(--purple-light);border:1px solid var(--purple-mid);border-radius:var(--r-sm);font-size:13px;color:#5B21B6;line-height:1.6">
+          <strong>與 Skill 的差異：</strong>Skill 是在主對話的 context 裡執行，Subagent 是完全隔離的獨立執行空間。需要大量探索、讀取很多檔案時用 Subagent；需要直接和主對話互動、邊分析邊修改時用 Skill。
+        </div>
+      </div>
+
+      <div class="tab-panel">
+        <div class="example-label">路徑：&lt;project&gt;/.claude/rules/api-rules.md</div>
+        <p style="font-size:14px;color:var(--slate);line-height:1.7;margin-bottom:16px">
+          Rules 是 CLAUDE.md 的進階用法，讓你針對<strong>特定路徑的檔案</strong>套用不同的規範，而不是讓所有規則對所有檔案都生效。YAML frontmatter 的 <code style="font-family:monospace;background:#F1F5F9;padding:1px 5px;border-radius:3px">paths</code> 欄位定義觸發條件，只有在 Claude 處理符合路徑的檔案時，這條規則才會被載入。
+        </p>
+        <div class="code-block">
+          <pre><span class="c-comment">---
+paths:
+  - "src/api/**/*.ts"
+  - "server/routes/**/*.ts"
+---</span>
+
+<span class="c-head"># API 端點開發規範</span>
+
+<span class="c-val">撰寫 API 相關程式碼時，務必遵守以下規範：</span>
+
+<span class="c-key">## 命名</span>
+<span class="c-val">- 路由路徑使用 kebab-case：/user-profile 而非 /userProfile
+- Controller 方法使用動詞開頭：getUser、createOrder、deleteSession</span>
+
+<span class="c-key">## 錯誤處理</span>
+<span class="c-val">- 所有 API 回應統一使用 ApiResponse&lt;T&gt; 型別
+- 錯誤碼對照表在 src/constants/errors.ts，不可自行新增錯誤碼
+- 必須捕捉並記錄例外，不允許 silent catch</span>
+
+<span class="c-key">## 輸入驗證</span>
+<span class="c-val">- 所有 request body 必須經過 Zod schema 驗證
+- 驗證 schema 放在對應 route 檔案的旁邊（同目錄）</span>
+
+<span class="c-key">## 文件</span>
+<span class="c-val">- 每個端點必須附上 OpenAPI 格式的 JSDoc 說明</span></pre>
+        </div>
+        <div class="highlight" style="margin-top:16px">
+          <strong>為什麼不直接放進 CLAUDE.md？</strong>如果把 API 規範放進主 CLAUDE.md，Claude 在寫前端元件時也會把這些規則載入 context，既浪費 token 又可能產生不必要的干擾。Rules 讓你的規範精準地只在對的地方生效——只有當 Claude 正在處理 <code style="font-family:monospace;font-size:12px;background:#F1F5F9;padding:1px 5px;border-radius:3px">src/api/**/*.ts</code> 這類檔案時，這條規則才會出現。
+        </div>
+        <div style="margin-top:12px;padding:14px 18px;background:var(--teal-light);border:1px solid var(--teal-mid);border-radius:var(--r-sm);font-size:13px;color:#0F766E;line-height:1.6">
+          <strong>存放位置：</strong>放在 <code style="font-family:monospace;font-size:12px;background:rgba(0,0,0,0.06);padding:1px 5px;border-radius:3px">&lt;project&gt;/.claude/rules/</code> 目錄下，支援 symlink，可以讓多個專案共用同一份規則檔。沒有路徑 frontmatter 的規則檔則在所有情況下都會載入，效果等同於 CLAUDE.md。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ROI SUMMARY ══ -->
+  <div class="section">
+    <div class="section-title">配置前後的工作效益總結</div>
+
+    <!-- Before/After comparison table -->
+    <div class="card" style="margin-bottom: 16px;">
+      <div class="example-label" style="margin-bottom: 14px;">任務對照：同一位 RD，配置前後的日常工作流差異</div>
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th style="width:18%">任務</th>
+            <th style="width:36%">沒配置之前</th>
+            <th style="width:36%">配置之後</th>
+            <th style="width:10%">節省估算</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>開新 session</td>
+            <td>每次都要花 5–10 分鐘解釋專案架構、Tech Stack、命名規則</td>
+            <td>CLAUDE.md 自動注入情境，直接說需求、直接開工</td>
+            <td style="color:#059669;font-weight:600;font-family:monospace">~8 min/次</td>
+          </tr>
+          <tr>
+            <td>Code Review</td>
+            <td>手動列出要檢查的規範點，容易漏項、標準不一致</td>
+            <td>/pr-review 一鍵觸發，輸出結構化問題清單，標準固定</td>
+            <td style="color:#059669;font-weight:600;font-family:monospace">~15 min/次</td>
+          </tr>
+          <tr>
+            <td>ESLint 修正</td>
+            <td>開發完後才想到要跑，常遺漏，上 PR 前補跑</td>
+            <td>PostToolUse Hook：存 .vue 自動執行，完全零負擔</td>
+            <td style="color:#059669;font-weight:600;font-family:monospace">~5 min/日</td>
+          </tr>
+          <tr>
+            <td>TypeScript 補全</td>
+            <td>一個一個慢慢定義型別，參考其他檔案來回切換</td>
+            <td>Skill 提供慣例範本，AI 依上下文快速補全</td>
+            <td style="color:#059669;font-weight:600;font-family:monospace">~10 min/次</td>
+          </tr>
+          <tr>
+            <td>長任務等待</td>
+            <td>一直盯著 terminal，無法切換去做其他事</td>
+            <td>Notification Hook：完成時桌面推播，自由切換任務</td>
+            <td style="color:#059669;font-weight:600;font-family:monospace">注意力切換</td>
+          </tr>
+          <tr>
+            <td>程式庫探索</td>
+            <td>大量的搜尋和閱讀塞滿主對話，context 很快就滿</td>
+            <td>Subagent（Explore）獨立掃描，僅回傳摘要給主對話</td>
+            <td style="color:#059669;font-weight:600;font-family:monospace">context 大幅降低</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Summary analysis cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div style="background:#FFF1F2;border:1px solid #FECDD3;border-radius:var(--r);padding:22px 24px">
+        <div style="font-size:13px;font-weight:700;color:#9F1239;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em">沒有配置的狀態</div>
+        <div style="font-size:14px;color:#BE123C;line-height:1.8">
+          每次 session 都要從零開始建立情境，AI 對你的專案架構一無所知。<br><br>
+          工作流依賴個人記憶和習慣，重複性操作（格式化、規範確認）容易被遺忘或跳過。<br><br>
+          長任務執行期間注意力被佔據，context window 在大量探索後快速消耗，影響後續開發效率。<br><br>
+          整體感受：<strong style="color:#9F1239">每天大約 30–60 分鐘消耗在「讓 AI 理解我是誰、我在做什麼」這件事上。</strong>
+        </div>
+      </div>
+      <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:var(--r);padding:22px 24px">
+        <div style="font-size:13px;font-weight:700;color:#065F46;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em">配置完成後的狀態</div>
+        <div style="font-size:14px;color:#047857;line-height:1.8">
+          CLAUDE.md 讓 AI 每次啟動就具備完整的專案知識，直接進入開發節奏，不需要反覆解釋。<br><br>
+          Hooks 把格式化、通知等瑣碎動作自動化，從「需要記得做」變成「系統保證會做」。<br><br>
+          Skills 和 Subagents 讓不同類型的任務有對應的專屬處理方式，主對話保持乾淨聚焦。<br><br>
+          整體感受：<strong style="color:#065F46">AI 從「你在教的工具」變成「了解你工作方式的協作夥伴」，節省的不只是時間，而是認知負擔。</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key takeaway -->
+    <div style="background:linear-gradient(135deg,#1E3A5F,#0F172A);border-radius:var(--r);padding:24px 28px;display:flex;gap:20px;align-items:flex-start">
+      <div style="font-size:28px;flex-shrink:0;margin-top:2px">💡</div>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:#F1F5F9;margin-bottom:8px">配置的核心價值不是「節省幾分鐘」</div>
+        <div style="font-size:14px;color:#94A3B8;line-height:1.8">
+          好的 AI 配置讓你的工作流從<span style="color:#60A5FA">「每次對話都是全新開始」</span>變成<span style="color:#60A5FA">「AI 持續理解你的專案脈絡」</span>。這份理解會隨時間累積，讓 AI 在你的開發環境裡越用越順。這正是這次競賽想看到的——不是炫技，而是真正讓你工作更省力的那套設定。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="part-divider">
+    <div class="part-num">03</div>
+    <div class="part-info">
+      <div class="part-title">怎麼繳交</div>
+      <div class="part-desc">繳交方式、Notion 表單說明，以及 Demo 當天的流程</div>
+    </div>
+  </div>
+
+  <!-- ══ HOW TO SUBMIT ══ -->
+  <div class="section">
+    <div class="section-title">怎麼繳交</div>
+    <div class="submit-box">
+      <h3>繳交你的 ~/.claude/* 設定</h3>
+      <p>不用寫長篇報告，直接把你的 AI 配置檔案打包上傳，讓設定本身說話。</p>
+      <div class="submit-steps">
+        <div class="step-row">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <strong>壓縮你的 .claude 資料夾</strong><br>
+            終端機執行：<code>zip -r my_claude_config.zip ~/.claude/</code><br>
+            或是把整個資料夾打包成 .zip 都可以
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <strong>到 Notion 繳交表單上傳</strong>（連結由部長發布）<br>
+            上傳 .zip 檔，並依照 Notion 表單六個欄位填寫說明（含配置結構、設計思路、效益、分享意願等）
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <strong>Demo 當天帶著你的設定來</strong><br>
+            5–8 分鐘，展示一下你的配置怎麼運作的就好，輕鬆分享即可
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight" style="margin-bottom: 16px;">
+      <strong>沒有 Claude Code 也沒關係：</strong>用 claude.ai 有自己的一套使用方式也歡迎分享，例如 prompt 範本、專案設定、memory 使用方式等等。
+    </div>
+
+    <div class="card mb-16">
+      <div class="example-label">Notion 繳交表單會問哪些東西</div>
+      <hr class="soft">
+      <table class="cmp-table">
+        <thead><tr><th>欄位</th><th>類型</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr><td>姓名 / 組別</td><td>文字 / 選單</td><td>填你的名字和前台 / 後台 / 後端</td></tr>
+          <tr><td>一、配置檔案結構說明</td><td>長文字</td><td>樹狀結構列出 ~/.claude/ 與各專案 .claude/ 的內容，並標注用途</td></tr>
+          <tr><td>二、你的實際配置說明</td><td>長文字</td><td>自由說明配置的設計思路，可涵蓋 CLAUDE.md、Skills、Hooks、Subagents、MCP 等</td></tr>
+          <tr><td>三、最有感的效益</td><td>長文字</td><td>配置前後最明顯的工作流差異，具體情境說明即可</td></tr>
+          <tr><td>四、配置檔案上傳</td><td>檔案上傳</td><td>~/.claude/* 打包成 .zip 上傳；有敏感資訊請先移除</td></tr>
+          <tr><td>五、是否願意分享</td><td>核取方塊</td><td>是否願意將配置放進部門 Wiki 作為範例，不影響評分</td></tr>
+          <tr><td>六、給其他 RD 的一句話建議</td><td>長文字</td><td>從你的摸索經驗中，有什麼是你希望早點知道的？</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="part-divider">
+    <div class="part-num">04</div>
+    <div class="part-info">
+      <div class="part-title">獎項、時程與地點</div>
+      <div class="part-desc">五個獎項的評選方向、活動時程，以及其他補充說明</div>
+    </div>
+  </div>
+
+  <!-- ══ VOLUNTARY ══ -->
+  <div class="card" style="margin-bottom:20px;border-left:4px solid var(--blue);padding:24px 28px">
+    <div style="display:flex;gap:16px;align-items:flex-start">
+      <div style="font-size:26px;flex-shrink:0">🙌</div>
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:8px">這個活動不是強制的</div>
+        <div style="font-size:14px;color:var(--slate);line-height:1.8">
+          參加與否完全依個人意願，沒有任何考核或評分壓力。<br><br>
+          舉辦這個活動的出發點很單純——AI 工具的配置方式每個人都不一樣，很多好用的設定都悶在自己的電腦裡沒有人知道。希望透過這個機會，讓大家有個理由認真研究一次自己的工作流，同時也能看看其他人怎麼玩，互相學一點、偷學一點。<br><br>
+          <strong>就算你只是來聽分享會，也很歡迎。</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SHARE ══ -->
+  <div class="share-box">
+    <h4>🌱 關於「放進部門 Wiki」這件事</h4>
+    <p>
+      競賽結束後，如果你願意的話，你的配置範本可以成為部門的共用資產，讓之後加入的人少走一點彎路。<br><br>
+      這完全是選擇性的，不是強制的。表單裡有個欄位可以勾選你的意願，沒有任何壓力。能分享的話當然最好，不想分享也完全 OK。
+    </p>
+  </div>
+
+  <!-- ══ AWARDS ══ -->
+  <div class="section">
+    <div class="section-title">獎項</div>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.7">五個獎項沒有名次之分，從不同面向肯定每個人的付出。</p>
+    <div class="award-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+      <div class="award-card">
+        <div class="award-emoji">⚡</div>
+        <div>
+          <div class="award-title">最佳工作流獎 <span style="font-size:13px;color:#059669;font-weight:700;margin-left:6px">NT$ 10,000</span></div>
+          <div class="award-desc">配置最完整、對日常工作改善最顯著，實際省下最多時間的設定</div>
+        </div>
+      </div>
+      <div class="award-card">
+        <div class="award-emoji">💡</div>
+        <div>
+          <div class="award-title">最佳創意獎 <span style="font-size:13px;color:#059669;font-weight:700;margin-left:6px">NT$ 5,000</span></div>
+          <div class="award-desc">整合方式獨特，用了大家沒想到的組合，讓人眼睛一亮的配置</div>
+        </div>
+      </div>
+      <div class="award-card">
+        <div class="award-emoji">🎤</div>
+        <div>
+          <div class="award-title">最佳分享獎 <span style="font-size:13px;color:#059669;font-weight:700;margin-left:6px">NT$ 2,000</span></div>
+          <div class="award-desc">Demo 當天說明最清楚、最能讓其他人立刻理解並想要照著試的人，獎勵的是把自己的設定講得讓大家聽懂這件事</div>
+        </div>
+      </div>
+      <div class="award-card">
+        <div class="award-emoji">🤝</div>
+        <div>
+          <div class="award-title">最佳團隊貢獻獎 <span style="font-size:13px;color:#059669;font-weight:700;margin-left:6px">NT$ 2,000</span></div>
+          <div class="award-desc">設定檔說明最完整、最願意開放給大家直接套用，對部門 Wiki 資產沉澱貢獻最多的人</div>
+        </div>
+      </div>
+      <div class="award-card" style="border-color: #FDE68A; background: #FFFBEB;">
+        <div class="award-emoji">🎰</div>
+        <div>
+          <div class="award-title">全員報名獎 <span style="font-size:13px;color:#059669;font-weight:700;margin-left:6px">NT$ 3,000</span></div>
+          <div class="award-desc">全體現職 RD（不含實習生）都完成繳交，則觸發此獎項。到了發表當天，由大家現場決定怎麼分配——獨得、平分、抽籤幾位，規則你們說了算</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TIMELINE ══ -->
+  <div class="section">
+    <div class="section-title">時程</div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot active">📢</div>
+        <div class="tl-date">4/1（三）</div>
+        <div class="tl-label">活動公告<br>& 正式開跑</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">🔬</div>
+        <div class="tl-date">4/1 – 4/27</div>
+        <div class="tl-label">自由探索期<br>有問題隨時問</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">📝</div>
+        <div class="tl-date">4/27（一）</div>
+        <div class="tl-label">繳交截止<br>23:59</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">🏆</div>
+        <div class="tl-date">4/30（四）14:00</div>
+        <div class="tl-label">成果發表 & 頒獎<br>大會議室</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FURTHER READING ══ -->
+  <div class="section">
+    <div class="section-title">想深入了解？延伸閱讀</div>
+    <div class="docs-grid">
+      <a class="doc-chip" href="https://code.claude.com/docs/en/overview" target="_blank">
+        <span class="doc-chip-icon">📖</span>
+        <span class="doc-chip-text"><strong>Claude Code 總覽</strong>整體功能與定位的起點</span>
+      </a>
+      <a class="doc-chip" href="https://code.claude.com/docs/en/features-overview" target="_blank">
+        <span class="doc-chip-icon">⚡</span>
+        <span class="doc-chip-text"><strong>各配置功能比較</strong>CLAUDE.md / Skills / Subagents / Hooks 的定位差異</span>
+      </a>
+      <a class="doc-chip" href="https://code.claude.com/docs/en/best-practices" target="_blank">
+        <span class="doc-chip-icon">✨</span>
+        <span class="doc-chip-text"><strong>Best Practices</strong>官方整理的進階使用建議</span>
+      </a>
+      <a class="doc-chip" href="https://code.claude.com/docs/en/hooks" target="_blank">
+        <span class="doc-chip-icon">🔩</span>
+        <span class="doc-chip-text"><strong>Hooks 完整 Reference</strong>所有事件類型、輸入輸出格式</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="card" style="text-align:center; padding: 28px; background: linear-gradient(135deg,#F0F9FF,#F0FDFA);">
+    <div style="font-size:28px; margin-bottom:12px">🎉</div>
+    <div style="font-size:16px; font-weight:600; color: var(--ink); margin-bottom:8px">不需要「完美配置」才能參加</div>
+    <div style="font-size:14px; color: var(--slate); max-width:460px; margin:0 auto">哪怕你只是在 CLAUDE.md 裡放了幾條規範，或是自訂了一個 /command，都值得上來分享。大家一起研究，比自己摸索快多了。</div>
+  </div>
+
+  <!-- ══ DISCLAIMER ══ -->
+  <div style="margin-top:60px;padding-top:24px;border-top:1px solid var(--border);text-align:center">
+    <p style="font-size:12px;color:var(--muted);line-height:1.8">
+      本活動由 <strong>開發部 · 部長 Bob</strong> 主辦<br>
+      各獎項之評選方式、得獎資格與獎金發放，主辦方保有最終解釋權<br>
+      如有疑問，請直接與部長聯繫
+    </p>
+  </div>
+
+
+</div>
+
+<script>
+function switchTab(idx) {
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.tab-panel');
+  tabs.forEach((t, i) => t.classList.toggle('active', i === idx));
+  panels.forEach((p, i) => p.classList.toggle('active', i === idx));
+}
+</script>
+</body>
+</html>
